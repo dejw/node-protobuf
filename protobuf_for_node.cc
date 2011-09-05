@@ -255,7 +255,7 @@ namespace protobuf_for_node {
 
         Message* message = type->NewMessage();
         bool success = 
-          message->ParseFromArray(buf->data(), buf->length());
+          message->ParseFromArray(Buffer::Data(buf), Buffer::Length(buf));
         Handle<Value> result = success
           ? Handle<Value>(type->ToJs(*message))
                 : v8::ThrowException(
@@ -375,7 +375,7 @@ namespace protobuf_for_node {
         if (!error) {
           result = Buffer::New(message->ByteSize());
           message->SerializeWithCachedSizesToArray(
-              (google::protobuf::uint8*)result->data());
+              (google::protobuf::uint8*)Buffer::Data(result));
         }
         delete message;
 
@@ -430,7 +430,7 @@ namespace protobuf_for_node {
       Buffer* buf = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
 
       FileDescriptorSet descriptors;
-      if (!descriptors.ParseFromArray(buf->data(), buf->length())) {
+      if (!descriptors.ParseFromArray(Buffer::Data(buf), Buffer::Length(buf))) {
         return v8::ThrowException(
             v8::Exception::Error(String::New("Malformed descriptor")));
       }
@@ -567,14 +567,13 @@ namespace protobuf_for_node {
       static ev_async ev_done;
 
       // in some thread:
-      static int Run(eio_req* req) {
+      static void Run(eio_req* req) {
         AsyncInvocation* self = static_cast<AsyncInvocation*>(req->data);
         self->service_->service_->CallMethod(self->method_,
                                              NULL,
                                              self->request_,
                                              self->response_,
                                              google::protobuf::NewCallback(&Done, self));
-        return 0;
       }
 
       // in some thread:
