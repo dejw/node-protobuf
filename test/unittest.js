@@ -1,7 +1,7 @@
 var assert = require('assert'),
     puts = require('sys').puts,
     read = require('fs').readFileSync,
-    Schema = require('protobuf_for_node').Schema;
+    Schema = require('protobuf').Schema;
 
 var T = new Schema(read('test/unittest.desc'))['protobuf_unittest.TestAllTypes'];
 assert.ok(T, 'type in schema');
