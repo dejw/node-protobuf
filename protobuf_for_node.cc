@@ -251,7 +251,7 @@ namespace protobuf_for_node {
 
       static Handle<Value> Parse(const Arguments& args) {
         Type* type = UnwrapThis<Type>(args);
-        Buffer* buf = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
+        Local<Object> buf = args[0]->ToObject();
 
         Message* message = type->NewMessage();
         bool success = 
@@ -427,7 +427,7 @@ namespace protobuf_for_node {
                            DescriptorPool::generated_pool()))->handle_;
       }
 
-      Buffer* buf = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
+      Local<Object> buf = args[0]->ToObject();
 
       FileDescriptorSet descriptors;
       if (!descriptors.ParseFromArray(Buffer::Data(buf), Buffer::Length(buf))) {
