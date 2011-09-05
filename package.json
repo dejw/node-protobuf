@@ -6,7 +6,7 @@
     "Igor Gumenyuk <me@exslim.net> (http://exslim.net)",
     "Dawid Fatyga <dawid.fatyga@gmail.com>"
   ],
-  "version": "0.1.2",
+  "version": "0.2.0",
   "main": "./protobuf",
   "engines": { "node": ">= 0.5.5" },
   "scripts": { "install": "make all" }
