@@ -1,0 +1,11 @@
+
+£
+
+test.protonode_protobuf"…
+TestMessage
+test (
+int32 (
+string (	2
+repeated (2 .node_protobuf.TestMessage.Inner
+Inner
+test (

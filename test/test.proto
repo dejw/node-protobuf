@@ -1,0 +1,14 @@
+package node_protobuf;
+
+message TestMessage {
+	optional int32 test = 1;
+
+	optional int32 int32 = 2;
+	optional string string = 3;
+
+	message Inner {
+		required int32 test = 1;
+	}
+
+	repeated Inner repeated = 4;
+}
