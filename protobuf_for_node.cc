@@ -25,7 +25,7 @@
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/service.h>
 
-#include <eio.h>
+#include <uv.h>
 #include <node_buffer.h>
 #include <node_object_wrap.h>
 
