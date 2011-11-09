@@ -4,8 +4,8 @@ var assert = require('assert');
 var fs = require('fs');
 
 // Load schema
-var Schema = require('protobuf').Schema;
-var TestSchema = new Schema(fs.readFileSync('./test.desc'));
+var Schema = require('../protobuf').Schema;
+var TestSchema = new Schema(fs.readFileSync('./test/test.desc'));
 var TestMessage = TestSchema['node_protobuf.TestMessage'];
 
 /* Generic roundtrip serialization test */

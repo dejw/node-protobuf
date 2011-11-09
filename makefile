@@ -8,3 +8,8 @@ all: build install
 
 clean:
 	@rm -rf ./build
+
+test: 
+	@nodeunit test
+
+.PHONY: all test
