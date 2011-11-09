@@ -1,11 +1,14 @@
 
-£
+Ç
 
-test.protonode_protobuf"…
+test.protonode_protobuf"©
 TestMessage
 test (
 int32 (
 string (	2
-repeated (2 .node_protobuf.TestMessage.Inner
+repeated (2 .node_protobuf.TestMessage.Inner
+buffer (
+
+camel_case (	
 Inner
 test (
