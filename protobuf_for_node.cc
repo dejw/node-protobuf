@@ -25,7 +25,7 @@
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/service.h>
 
-#include <eio.h>
+#include <uv.h>
 #include <node_buffer.h>
 #include <node_object_wrap.h>
 
@@ -54,6 +54,7 @@ using v8::AccessorInfo;
 using v8::Arguments;
 using v8::Boolean;
 using v8::Context;
+using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionTemplate;
@@ -69,6 +70,7 @@ using v8::ObjectTemplate;
 using v8::Persistent;
 using v8::Script;
 using v8::String;
+using v8::ThrowException;
 using v8::Value;
 using v8::V8;
 
@@ -141,11 +143,11 @@ namespace protobuf_for_node {
           from <<
             "var x = arr[" << i << "]; "
             "if(x !== undefined) this['" <<
-            descriptor->field(i)->name() <<
+            descriptor->field(i)->camelcase_name() <<
             "'] = x; ";
 
           if (i > 0) to << ", ";
-          to << "this['" << descriptor->field(i)->name() << "']";
+          to << "this['" << descriptor->field(i)->camelcase_name() << "']";
         }
 
         from << " }})";
@@ -190,7 +192,12 @@ namespace protobuf_for_node {
           return message_type->ToJs(GET(Message));
         case FieldDescriptor::CPPTYPE_STRING: {
           const string& value = GET(String);
-          return String::New(value.data(), value.length());
+          if (field->type() == FieldDescriptor::TYPE_BYTES) {
+            return Buffer::New(const_cast<char *>(value.data()),
+                               value.length())->handle_;
+          } else {
+            return String::New(value.data(), value.length());
+          }
         }
         case FieldDescriptor::CPPTYPE_INT32:
           return Integer::New(GET(Int32));
@@ -251,11 +258,15 @@ namespace protobuf_for_node {
 
       static Handle<Value> Parse(const Arguments& args) {
         Type* type = UnwrapThis<Type>(args);
-        Local<Object> buf = args[0]->ToObject();
+        if (!Buffer::HasInstance(args[0])) {
+          return ThrowException(Exception::TypeError(
+             String::New("Argument should be a buffer")));
+        }
+        Local<Object> buffer_obj = args[0]->ToObject();
 
         Message* message = type->NewMessage();
-        bool success = 
-          message->ParseFromArray(Buffer::Data(buf), Buffer::Length(buf));
+        bool success =
+          message->ParseFromArray(Buffer::Data(buffer_obj), Buffer::Length(buffer_obj));
         Handle<Value> result = success
           ? Handle<Value>(type->ToJs(*message))
                 : v8::ThrowException(
@@ -288,8 +299,14 @@ namespace protobuf_for_node {
                         value.As<Object>());
           break;
         case FieldDescriptor::CPPTYPE_STRING: {
-          String::AsciiValue ascii(value);
-          SET(String, string(*ascii, ascii.length()));
+          // Shortcutting Utf8value(buffer.toString())
+          if (Buffer::HasInstance(value)) {
+            Local<Object> buf = value->ToObject();
+            SET(String, string(Buffer::Data(buf), Buffer::Length(buf)));
+          } else {
+            String::Utf8Value utf8(value);
+            SET(String, string(*utf8, utf8.length()));
+          }
           break;
         }
         case FieldDescriptor::CPPTYPE_INT32:
@@ -427,10 +444,16 @@ namespace protobuf_for_node {
                            DescriptorPool::generated_pool()))->handle_;
       }
 
-      Local<Object> buf = args[0]->ToObject();
+      if (!Buffer::HasInstance(args[0])) {
+        return ThrowException(Exception::TypeError(
+           String::New("Argument should be a buffer")));
+      }
+      Local<Object> buffer_obj = args[0]->ToObject();
+      char *buffer_data = Buffer::Data(buffer_obj);
+      size_t buffer_length = Buffer::Length(buffer_obj);
 
       FileDescriptorSet descriptors;
-      if (!descriptors.ParseFromArray(Buffer::Data(buf), Buffer::Length(buf))) {
+      if (!descriptors.ParseFromArray(buffer_data, buffer_length)) {
         return v8::ThrowException(
             v8::Exception::Error(String::New("Malformed descriptor")));
       }

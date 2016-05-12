@@ -11,4 +11,8 @@ message TestMessage {
 	}
 
 	repeated Inner repeated = 4;
+
+  optional bytes buffer = 5;
+
+  optional string camel_case = 6; //will be camelCased
 }

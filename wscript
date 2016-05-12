@@ -35,7 +35,13 @@ def configure(conf):
   if Options.platform == 'darwin':
     conf.env.append_value('LINKFLAGS', ['-undefined', 'dynamic_lookup'])
   if not conf.env.PROTOBUF_PATH:
-    Logs.warn("Option --protobuf_path wasn\'t defined. Trying default: %s" % conf.env.DEFAULT_PROTOBUF_PATH)
+    path = os.path.join('/usr/' 'include', 'google', 'protobuf')
+    Logs.warn(path)
+    if os.path.isdir(path):
+        conf.env.DEFAULT_PROTOBUF_PATH = '/usr'
+        Logs.warn("Option --protobuf_path wasn\'t defined. Found protobuf in: %s" % conf.env.DEFAULT_PROTOBUF_PATH)
+    else:
+      Logs.warn("Option --protobuf_path wasn\'t defined. Trying default: %s" % conf.env.DEFAULT_PROTOBUF_PATH)
   conf.env.append_value("CPPPATH_PROTOBUF", "%s/include"%(conf.env.PROTOBUF_PATH))
   conf.env.append_value("LIBPATH_PROTOBUF", "%s/lib"%(conf.env.PROTOBUF_PATH))
   conf.env.append_value("LIB_PROTOBUF", "protobuf")
